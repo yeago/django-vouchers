@@ -16,7 +16,7 @@ from voucher.utils import get_voucher_forms, render_email_for_voucher_claimed
 
 VOUCHER_SEND_NOTIFICATION = getattr(settings, 'VOUCHER_SEND_NOTIFICATION', True)
 NOTIFY_VOUCHER_FROM = getattr(settings, 'NOTIFY_VOUCHER_FROM', None)
-SEND_TO = [email for user, email in getattr(settings, 'VOUCHER_MANAGERS', [])]
+VOUCHER_MANAGERS = getattr(settings, 'VOUCHER_MANAGERS', [])
 
 VOUCHERS = get_voucher_forms()
 
@@ -119,7 +119,7 @@ class Voucher(models.Model):
                 raise ValidationError("You must define a sender in your settings.py NOTIFY_VOUCHER_FROM")
             self.notified = True
             subject = "Voucher claimed (%s) by %s" % (self.voucher, self.user)
-            from_email, to = NOTIFY_VOUCHER_FROM, SEND_TO
+            from_email, to = NOTIFY_VOUCHER_FROM, [i for (_, i) in VOUCHER_MANAGERS]
             html_content = render_email_for_voucher_claimed(self)
             msg = EmailMultiAlternatives(subject, subject, from_email, to)
             msg.attach_alternative(html_content, "text/html")
