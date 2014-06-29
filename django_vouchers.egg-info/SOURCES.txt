@@ -1,4 +1,5 @@
 README
+setup.py
 django_vouchers.egg-info/PKG-INFO
 django_vouchers.egg-info/SOURCES.txt
 django_vouchers.egg-info/dependency_links.txt
@@ -8,4 +9,8 @@ voucher/admin.py
 voucher/forms.py
 voucher/humanhash.py
 voucher/models.py
+voucher/urls.py
 voucher/utils.py
+voucher/views.py
+voucher/migrations/0001_initial.py
+voucher/migrations/__init__.py
