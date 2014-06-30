@@ -10,7 +10,6 @@ def get_voucher_forms(prefix=None):
         klass = modstring.pop()
         package = ".".join(modstring)
         module = importlib.import_module(package)
-        voucher_form = getattr(module, klass)()
-        voucher_form.name = voucher_name
+        voucher_form = getattr(module, klass)
         voucher_forms[voucher_name] = voucher_form
     return voucher_forms
