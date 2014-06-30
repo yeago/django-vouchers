@@ -1,0 +1,16 @@
+This is a simple app to add vouchers support to your Django Project.
+
+The idea is to define Forms for any kind of voucher that you want and add them to settings.VOUCHERS variable.
+
+e.g:
+VOUCHERS = [('tshirt', 'project.vouchers.VoucherTShirtForm')]
+
+and then define in project/vouchers.py something like:
+
+
+TSHIRT_SIZE = (('s', 'S'), ('m', 'M'), ('l', 'L'), ('xl', 'XL'), ('2xl', 'XXL'))
+
+class VoucherTShirtForm(forms.Form):
+    size = forms.ChoiceField(choices=TSHIRT_SIZE)
+    address = forms.CharField(max_length=200)
+    email = forms.EmailField()
