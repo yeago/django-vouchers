@@ -3,12 +3,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='django-forum',
+    name='django-vouchers',
     version="0.1",
-    author='Steve Yeago',
-    author_email='subsume@gmail.com',
-    description='Forum in Django',
-    url='http://github.com/subsume/django-forum',
+    author='Federico Castro',
+    author_email='fmc0208@gmail.com',
+    description='Vouchers in Django',
+    url='https://github.com/yeago/django-vouchers',
     packages=find_packages(),
     include_package_data=True,
     classifiers=[
