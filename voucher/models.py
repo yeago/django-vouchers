@@ -82,8 +82,15 @@ class Voucher(models.Model):
         self.voucher_info = voucher_info
         self.claimed_date = datetime.datetime.now()
         self.activated = False
-        self.notified = True
+        self.notified = False
         self.save()
+
+    def get_voucher_form(self):
+        if self.voucher and self.voucher in VOUCHERS:
+            form = VOUCHERS[self.voucher](self.voucher_info)
+            if form.is_valid():
+                return form
+        return VOUCHERS[self.voucher]()
 
     def get_voucher_info_template(self):
         if self.voucher_info and self.voucher:
@@ -101,9 +108,11 @@ class Voucher(models.Model):
         if VOUCHER_SEND_NOTIFICATION and self.is_claimed() and not self.notified:
             if not NOTIFY_VOUCHER_FROM:
                 raise ValueError("You must define a sender in your settings.py NOTIFY_VOUCHER_FROM")
+            self.notified = True
             subject, from_email, to = "Voucher claimed (%s)" % self.voucher, NOTIFY_VOUCHER_FROM, SEND_TO
             text_content = 'The user %s has claimed the voucher %s (%s)' % (self.user, self.voucher, self.human_token)
             html_content = self.get_voucher_info_template()
+            html_content = '<p>%s</p><div>%s</div>' % (text_content, html_content)
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
             msg.send(fail_silently=False)
