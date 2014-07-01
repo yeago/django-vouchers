@@ -15,7 +15,7 @@ from .utils import get_voucher_forms
 
 VOUCHER_SEND_NOTIFICATION = getattr(settings, 'VOUCHER_SEND_NOTIFICATION', True)
 NOTIFY_VOUCHER_FROM = getattr(settings, 'NOTIFY_VOUCHER_FROM', None)
-SEND_TO = getattr(settings, 'VOUCHER_MANAGERS', ['fmc0208@gmail.com'])
+SEND_TO = getattr(settings, 'VOUCHER_MANAGERS', [])
 
 VOUCHERS = get_voucher_forms()
 
