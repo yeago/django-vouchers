@@ -8,11 +8,11 @@ VOUCHERS = [('tshirt', 'project.vouchers.VoucherTShirtForm')]
 and then define in project/vouchers.py something like:
 
 
-from voucher.form import BaseVoucherForm
 
 TSHIRT_SIZE = (('s', 'S'), ('m', 'M'), ('l', 'L'), ('xl', 'XL'), ('2xl', 'XXL'))
 
-class VoucherTShirtForm(BaseVoucherForm):
+class VoucherTShirtForm(forms.Form):
+    token = forms.Charfield(max_length=50)
     size = forms.ChoiceField(choices=TSHIRT_SIZE)
     address = forms.CharField(max_length=200)
     email = forms.EmailField()
