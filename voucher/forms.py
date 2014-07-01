@@ -20,7 +20,3 @@ class VoucherAdminForm(forms.ModelForm):
     def generate_token(self):
         human_hasher = HumanHasher()
         return human_hasher.uuid()
-
-
-class BaseVoucherForm(forms.Form):
-    token = forms.CharField(max_length=50)
