@@ -10,7 +10,7 @@ from django.db import models
 
 from .humanhash import HumanHasher
 
-from .utils import get_voucher_forms
+from .utils import get_voucher_forms, render_email_for_voucher_claimed
 
 
 VOUCHER_SEND_NOTIFICATION = getattr(settings, 'VOUCHER_SEND_NOTIFICATION', True)
@@ -41,12 +41,14 @@ class Voucher(models.Model):
     notified = models.BooleanField(default=False)
     activated = models.BooleanField(default=True)
 
-    def generate_token(self):
+    def reactivate_voucher(self):
         human_hasher = HumanHasher()
         human_token, token = human_hasher.uuid()
         self.token = token
         self.human_token = human_token
         self.activated = True
+        self.claimed_date = None
+        self.notified = False
         return human_token, token
 
     def is_valid_token(self, token):
@@ -67,9 +69,15 @@ class Voucher(models.Model):
     def claim_voucher(self, user, human_token, voucher_info=None):
         if self.is_claimed():
             raise ValueError("Voucher already claimed by %s" % self.user)
+
         if human_token != self.human_token:
             raise ValueError("Cannot claim voucher, invalid token.")
-        if self.voucher and not VOUCHERS[self.voucher](voucher_info or {}).is_valid():
+
+        if not self.voucher in VOUCHERS:
+            raise ValueError("Invalid voucher choice.")
+
+        voucher_form = VOUCHERS[self.voucher](voucher_info or {})
+        if not voucher_form.is_valid():
             raise ValueError("Invalid voucher info.")
 
         if not isinstance(user, User):
@@ -79,7 +87,8 @@ class Voucher(models.Model):
             raise ValueError("Cannot claim voucher, the user assigned don't match")
         elif not self.user:
             self.user = user
-        self.voucher_info = voucher_info
+
+        self.voucher_info = voucher_form.cleaned_data
         self.claimed_date = datetime.datetime.now()
         self.activated = False
         self.notified = False
@@ -87,7 +96,7 @@ class Voucher(models.Model):
 
     def get_voucher_form(self):
         if self.voucher and self.voucher in VOUCHERS:
-            form = VOUCHERS[self.voucher](self.voucher_info)
+            form = VOUCHERS[self.voucher](self.voucher_info or {})
             if form.is_valid():
                 return form
         return VOUCHERS[self.voucher]()
@@ -104,16 +113,14 @@ class Voucher(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.token:
-            self.generate_token()
+            self.reactivate_voucher()
         if VOUCHER_SEND_NOTIFICATION and self.is_claimed() and not self.notified:
             if not NOTIFY_VOUCHER_FROM:
                 raise ValueError("You must define a sender in your settings.py NOTIFY_VOUCHER_FROM")
             self.notified = True
-            subject, from_email, to = "Voucher claimed (%s)" % self.voucher, NOTIFY_VOUCHER_FROM, SEND_TO
-            text_content = 'The user %s has claimed the voucher %s (%s)' % (self.user, self.voucher, self.human_token)
-            html_content = self.get_voucher_info_template()
-            html_content = '<p>%s</p><div>%s</div>' % (text_content, html_content)
-            msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+            subject, from_email, to = "Voucher claimed (%s) by %s" % (self.voucher, self.user), NOTIFY_VOUCHER_FROM, SEND_TO
+            html_content = render_email_for_voucher_claimed(self)
+            msg = EmailMultiAlternatives(subject, subject, from_email, to)
             msg.attach_alternative(html_content, "text/html")
             msg.send(fail_silently=False)
         super(Voucher, self).save(*args, **kwargs)

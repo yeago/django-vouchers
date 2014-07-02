@@ -16,9 +16,9 @@ def deactivate_token(self, request, queryset):
         voucher.save()
 
 
-def activate_token(self, request, queryset):
+def reactivate_token(self, request, queryset):
     for voucher in queryset.all():
-        voucher.activated = True
+        voucher.reactivate_voucher()
         voucher.save()
 
 
@@ -26,7 +26,7 @@ class VoucherAdmin(admin.ModelAdmin):
     list_display = ['voucher', 'user', 'activated', 'notified', 'claimed_date', 'created_by', 'last_editor']
     readonly_fields = ['creation_date', 'claimed_date', 'activated', 'voucher_info', 'created_by', 'last_editor',
                        'last_edit_datetime', 'notified']
-    actions = [generate_token, deactivate_token]
+    actions = [generate_token, deactivate_token, reactivate_token]
     form = VoucherAdminForm
 
     def get_form(self, request, obj=None, **kwargs):

@@ -1,0 +1,16 @@
+<div id="content">
+    <h2>A voucher {{ voucher.voucher }} has been claimed by {{ voucher.user }} at {{ voucher.claimed_date }}.</h2>
+
+    <p>Here you have the details of the voucher:</p>
+    <div>
+        {{ voucher.get_voucher_info_template }}
+    </div>
+
+    <p><b>Voucher token:</b> {{ voucher.token }}</p>
+    <p><b>Voucher human token:</b> {{ voucher.human_token }}</p>
+
+    <p>The voucher was created by <b>{{ voucher.created_by }}</b> at {{ voucher.creation_date }}.</p>
+    <p>Last edition <b>{{ voucher.last_editor }}</b> at {{ voucher.last_edit_datetime }}.</p>
+
+    <h3>Thanks!</h3>
+</div>

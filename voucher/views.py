@@ -16,7 +16,7 @@ class VoucherList(ListView):
 
     def get_queryset(self):
         try:
-            self.f = Voucher.objects.filter(activated=True)
+            self.f = Voucher.objects.all()
         except Voucher.DoesNotExist:
             raise Http404
         return self.f
@@ -28,17 +28,24 @@ class VoucherList(ListView):
 
 
 def claimvoucher(request, voucher):
-    if not request.user.is_authenticated() or not \
-            ('submit' in request.POST and 'Claim Voucher' in request.POST['submit']):
-        messages.error(request, 'Cannot claim voucher')
-        return render_to_response('voucher_list.html', RequestContext(request))
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect('%s?next=%s' % (LOGIN_URL, request.path))
     voucher = get_object_or_404(Voucher, id=voucher)
-    token = request.POST.get('token')
-    voucher_info = request.POST
-    try:
-        voucher.claim_voucher(request.user, token, voucher_info=voucher_info)
-    except ValueError as error:
-        messages.error(request, error.message)
-        return render_to_response('voucher_list.html', RequestContext(request))
-    messages.info(request, 'Voucher claimed!')
-    return render_to_response('voucher_list.html', RequestContext(request))
+    if voucher.user != request.user:
+        raise Http404()
+    if request.method == 'POST' and 'submit' in request.POST and 'Claim Voucher' in request.POST['submit']:
+        token = request.POST.get('token')
+        voucher_info = request.POST
+        try:
+            voucher.claim_voucher(request.user, token, voucher_info=voucher_info)
+        except ValueError as error:
+            messages.error(request, error.message)
+            return render_to_response('voucher/voucher.html', RequestContext(request))
+        messages.info(request, 'Voucher claimed!')
+        return render_to_response('voucher/voucher.html', RequestContext(request))
+    elif request.method == 'GET':
+        form = voucher.get_voucher_form()
+        return render_to_response('voucher/voucher.html',
+                                  RequestContext(request, {'is_claimed': voucher.is_claimed(),
+                                                           'form': form,
+                                                           'voucher': voucher}))

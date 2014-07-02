@@ -1,5 +1,6 @@
 import importlib
 
+from django.template.loader import render_to_string
 from django.conf import settings
 
 
@@ -13,3 +14,7 @@ def get_voucher_forms(prefix=None):
         voucher_form = getattr(module, klass)
         voucher_forms[voucher_name] = voucher_form
     return voucher_forms
+
+
+def render_email_for_voucher_claimed(voucher):
+    return render_to_string('notify.html', {'voucher': voucher})
