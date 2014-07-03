@@ -1,22 +1,35 @@
 from django import forms
-from .humanhash import HumanHasher
+from voucher.humanhash import HumanHasher
 
-from .models import Voucher
+from voucher.models import Voucher
 
 
 class VoucherAdminForm(forms.ModelForm):
-
     class Meta:
         model = Voucher
 
     def __init__(self, *args, **kwargs):
         super(VoucherAdminForm, self).__init__(*args, **kwargs)
-        human_token, token = self.generate_token()
-        self.fields['human_token'].initial = human_token
+        token, human_token = self.generate_token()
         self.fields['token'].initial = token
-        self.fields['human_token'].widget.attrs['readonly'] = True
         self.fields['token'].widget.attrs['readonly'] = True
 
+        self.fields['human_token'].initial = human_token
+        self.fields['human_token'].widget.attrs['readonly'] = True
+
     def generate_token(self):
-        human_hasher = HumanHasher()
-        return human_hasher.uuid()
+        max_tries, tries = 5, 0
+        while tries <= max_tries:
+            human_hasher = HumanHasher()
+            human_token, token = human_hasher.uuid()
+            try:
+                Voucher.objects.get(human_token=human_token)
+                tries += 1
+            except Voucher.DoesNotExist:
+                break
+        return token, human_token
+
+    def refresh_tokens(self):
+        token, human_token = self.generate_token()
+        self.cleaned_data['token'] = token
+        self.cleaned_data['human_token'] = human_token

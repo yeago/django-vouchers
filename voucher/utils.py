@@ -16,5 +16,10 @@ def get_voucher_forms(prefix=None):
     return voucher_forms
 
 
+def get_voucher_form(voucher):
+    vouchers_forms = get_voucher_forms()
+    return vouchers_forms.get(voucher.voucher)
+
+
 def render_email_for_voucher_claimed(voucher):
     return render_to_string('notify.html', {'voucher': voucher})
