@@ -37,6 +37,7 @@ def reactivate_token(self, request, queryset):
 
 
 class VoucherAdmin(admin.ModelAdmin):
+    raw_id_fields = ['user']
     list_display = ['voucher', 'user', 'activated', 'notified', 'claimed_date', 'created_by', 'last_editor']
     readonly_fields = ['creation_date', 'claimed_date', 'activated', 'voucher_info', 'created_by', 'last_editor',
                        'last_edit_datetime', 'notified']
