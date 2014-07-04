@@ -8,6 +8,8 @@ functions. For tighter control over the output, see :class:`HumanHasher`.
 import operator
 import uuid as uuidlib
 
+from django.conf import settings
+
 
 DEFAULT_WORDLIST = (
     'ack', 'alabama', 'alanine', 'alaska', 'alpha', 'angel', 'apart', 'april',
@@ -46,6 +48,9 @@ DEFAULT_WORDLIST = (
     'washington', 'west', 'whiskey', 'white', 'william', 'winner', 'winter',
     'wisconsin', 'wolfram', 'wyoming', 'xray', 'yankee', 'yellow', 'zebra',
     'zulu')
+
+
+DEFAULT_WORDLIST = getattr(settings, 'VOUCHER_WORDLIST', DEFAULT_WORDLIST)
 
 
 class HumanHasher(object):
