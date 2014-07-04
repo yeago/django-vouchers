@@ -16,7 +16,7 @@ from voucher.utils import get_voucher_forms, render_email_for_voucher_claimed
 
 VOUCHER_SEND_NOTIFICATION = getattr(settings, 'VOUCHER_SEND_NOTIFICATION', True)
 NOTIFY_VOUCHER_FROM = getattr(settings, 'NOTIFY_VOUCHER_FROM', None)
-SEND_TO = getattr(settings, 'VOUCHER_MANAGERS', [])
+SEND_TO = [email for user, email in getattr(settings, 'VOUCHER_MANAGERS', [])]
 
 VOUCHERS = get_voucher_forms()
 
