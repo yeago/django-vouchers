@@ -23,7 +23,7 @@ def claim_voucher(request, human_token=None):
     /vouchers/claim/<human_token>
     """
     human_token = slugify(human_token or '')
-    voucher_name, voucher_image = '', ''
+    voucher_name = ''
     is_claimed = False
     form = None
     voucher = None
