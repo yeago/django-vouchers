@@ -1,6 +1,6 @@
 import datetime
 from jsonfield.fields import JSONField
-
+from django.template.defaultfilters import slugify
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
@@ -11,7 +11,7 @@ from django.db import models
 
 from voucher.humanhash import HumanHasher
 
-from voucher.utils import get_voucher_forms, render_email_for_voucher_claimed
+from voucher.utils import get_voucher_forms, render_email_for_voucher_claimed, get_voucher_form
 
 
 VOUCHER_SEND_NOTIFICATION = getattr(settings, 'VOUCHER_SEND_NOTIFICATION', True)
@@ -22,7 +22,7 @@ VOUCHERS = get_voucher_forms()
 
 
 def get_voucher_choices():
-    return [(voucher, voucher.upper()) for voucher in VOUCHERS.keys()]
+    return [(s_name, voucher['name']) for s_name, voucher in VOUCHERS.items()]
 
 
 class Voucher(models.Model):
@@ -72,10 +72,10 @@ class Voucher(models.Model):
         if self.is_claimed():
             raise ValidationError("Voucher already claimed by %s" % self.user)
 
-        if not self.voucher in VOUCHERS:
+        if not slugify(self.voucher) in VOUCHERS:
             raise ValidationError("Invalid voucher choice.")
 
-        voucher_form = VOUCHERS[self.voucher](voucher_info or {})
+        voucher_form = get_voucher_form(self)(voucher_info or {})
         if not voucher_form.is_valid():
             raise ValidationError("Invalid voucher info.")
 
@@ -85,10 +85,10 @@ class Voucher(models.Model):
         if not isinstance(user, User):
             user = get_object_or_404(User, username=user)
 
-        if self.user and user != self.user:
-            raise ValidationError("Cannot claim voucher, the user assigned don't match")
-        elif not self.user:
+        if not self.user:
             self.user = user
+        elif self.user and user != self.user:
+            raise ValidationError("Cannot claim voucher, the user assigned don't match")
 
         self.voucher_info = voucher_form.cleaned_data
         self.claimed_date = datetime.datetime.now()
@@ -99,13 +99,13 @@ class Voucher(models.Model):
     def get_voucher_form(self, voucher_info=None):
         voucher_info = voucher_info or self.voucher_info or {}
         if self.voucher and self.voucher in VOUCHERS:
-            form = VOUCHERS[self.voucher](voucher_info)
+            form = get_voucher_form(self)(voucher_info)
             form.is_valid()
             return form
 
     def get_voucher_info_template(self):
         if self.voucher_info and self.voucher:
-            voucher_form = VOUCHERS[self.voucher]
+            voucher_form = get_voucher_form(self)
             for field in voucher_form.base_fields:
                 voucher_form.base_fields[field].widget.attrs['readonly'] = True
             voucher_form = voucher_form(self.voucher_info)
@@ -114,7 +114,22 @@ class Voucher(models.Model):
         return ''
 
     def save(self, *args, **kwargs):
-        if VOUCHER_SEND_NOTIFICATION and self.is_claimed() and not self.notified:
+        self.voucher = slugify(self.voucher)
+        if not self.voucher in VOUCHERS:
+            raise ValueError("Cannot create voucher, invalid voucher choice... (%s)" % self.voucher)
+        if not self.token:
+            for n_try in range(11):
+                if n_try == 10:
+                    raise ValidationError("Cannot create voucher, max attempts reached.")
+                human_token, token = self.generate_token()
+                try:
+                    Voucher.objects.get(human_token=human_token, token=token)
+                    Voucher.objects.create()
+                except Voucher.DoesNotExist:
+                    self.human_token = human_token
+                    self.token = token
+                    break
+        elif VOUCHER_SEND_NOTIFICATION and self.is_claimed() and not self.notified:
             if not NOTIFY_VOUCHER_FROM:
                 raise ValidationError("You must define a sender in your settings.py NOTIFY_VOUCHER_FROM")
             self.notified = True

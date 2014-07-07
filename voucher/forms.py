@@ -33,3 +33,7 @@ class VoucherAdminForm(forms.ModelForm):
         token, human_token = self.generate_token()
         self.cleaned_data['token'] = token
         self.cleaned_data['human_token'] = human_token
+
+
+class TokenForm(forms.Form):
+    token = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))

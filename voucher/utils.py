@@ -1,5 +1,5 @@
 import importlib
-
+from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 from django.conf import settings
 
@@ -12,13 +12,19 @@ def get_voucher_forms(prefix=None):
         package = ".".join(modstring)
         module = importlib.import_module(package)
         voucher_form = getattr(module, klass)
-        voucher_forms[voucher_name] = voucher_form
+        voucher_forms[slugify(voucher_name)] = {'form_class': voucher_form,
+                                                'name': voucher_name}
     return voucher_forms
 
 
 def get_voucher_form(voucher):
     vouchers_forms = get_voucher_forms()
-    return vouchers_forms.get(voucher.voucher)
+    return vouchers_forms.get(slugify(voucher.voucher), {}).get('form_class')
+
+
+def get_voucher_form_name(voucher):
+    vouchers_forms = get_voucher_forms()
+    return vouchers_forms.get(slugify(voucher.voucher), {}).get('name')
 
 
 def render_email_for_voucher_claimed(voucher):
