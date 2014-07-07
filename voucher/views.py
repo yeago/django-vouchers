@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from voucher.forms import TokenForm
-from voucher.utils import get_voucher_form, get_voucher_form_name
+from voucher.utils import get_voucher_form, get_voucher_form_name, get_voucher_image
 from voucher.models import Voucher
 
 
@@ -23,7 +23,7 @@ def claim_voucher(request, human_token=None):
     /vouchers/claim/<human_token>
     """
     human_token = slugify(human_token or '')
-    voucher_name = ''
+    voucher_name, voucher_image = '', ''
     is_claimed = False
     form = None
     voucher = None
@@ -63,9 +63,11 @@ def claim_voucher(request, human_token=None):
                     messages.success(request, 'Voucher information has been sent!')
                 except ValidationError as error:
                     messages.error(request, '\n'.join(error.messages))
-
+    if voucher:
+        voucher_image = get_voucher_image(voucher)
     return render_to_response('voucher/voucher.html',
-                              RequestContext(request, {'voucher_name': voucher_name,
+                              RequestContext(request, {'voucher_image': voucher_image,
+                                                       'voucher_name': voucher_name,
                                                        'token': human_token,
                                                        'is_claimed': is_claimed,
                                                        'form': form,
