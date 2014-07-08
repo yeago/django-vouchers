@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-vouchers',
-    version="0.1",
+    version="0.4",
     author='Federico Castro',
     author_email='fmc0208@gmail.com',
     description='Vouchers in Django',
