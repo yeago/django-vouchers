@@ -1,6 +1,7 @@
+from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render_to_response, redirect
+from django.shortcuts import render_to_response, redirect
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.template import RequestContext
@@ -17,6 +18,7 @@ LOGIN_URL = getattr(settings, 'LOGIN_URL', '/accounts/login/')
 
 
 @login_required(login_url=LOGIN_URL)
+@transaction.autocommit()
 def claim_voucher(request, human_token=None):
     """
     /vouchers/claim/
@@ -29,7 +31,10 @@ def claim_voucher(request, human_token=None):
     voucher = None
 
     if request.method == 'GET' and human_token:
-        voucher = get_object_or_404(Voucher, human_token=human_token)
+        try:
+            voucher = Voucher.objects.select_for_update().get(human_token=human_token)
+        except Voucher.DoesNotExist:
+            raise Http404
         form = get_voucher_form(voucher)()
         if voucher.user and voucher.user != request.user:
             raise Http404()
@@ -52,7 +57,10 @@ def claim_voucher(request, human_token=None):
 
         if 'submit' in request.POST and 'Send' in request.POST['submit'] and human_token:
             human_token = slugify(human_token)
-            voucher = get_object_or_404(Voucher, human_token=human_token, user=request.user)
+            try:
+                voucher = Voucher.objects.select_for_update().get(human_token=human_token, user=request.user)
+            except Voucher.DoesNotExist:
+                raise Http404
             voucher_klass_form = get_voucher_form(voucher)
             voucher_name = get_voucher_form_name(voucher)
             form = voucher_klass_form(request.POST)
@@ -63,7 +71,6 @@ def claim_voucher(request, human_token=None):
                     messages.success(request, 'Voucher information has been sent!')
                 except ValidationError as error:
                     messages.error(request, '\n'.join(error.messages))
-
     template = get_voucher_template(voucher)
     return render_to_response(template.name,
                               RequestContext(request, {'voucher_name': voucher_name,

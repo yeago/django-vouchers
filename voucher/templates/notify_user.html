@@ -1,0 +1,19 @@
+<div id="content">
+{% block content %}
+    <h2>Hi {{ username }}, Congratulations!</h2>
+
+    <p>A {{ voucher_name }} voucher has been assigned to you!</p>
+    {% block preview_voucher %}
+    {% endblock %}
+    {% block claim_message %}
+    <p>You could claim your voucher <a href="{{ voucher_link }}">here</a>.</p>
+    {% endblock %}
+    {% if expiry_date %}
+        <p>Hurry up! You have time until {{ expiry_date }} to claim your voucher.</p>
+    {% endif %}
+    <p><b>Token:</b> {{ human_token }}</p>
+    {% block signed %}
+    <p>Thanks, {{ sign }}</p>
+    {% endblock%}
+{% endblock %}
+</div>
