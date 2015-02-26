@@ -32,7 +32,7 @@ def claim_voucher(request, human_token=None):
 
     if request.method == 'GET' and human_token:
         try:
-            voucher = Voucher.objects.select_for_update().get(human_token=human_token)
+            voucher = Voucher.objects.get(human_token=human_token)
         except Voucher.DoesNotExist:
             raise Http404
         form = get_voucher_form(voucher)()
@@ -58,7 +58,7 @@ def claim_voucher(request, human_token=None):
         if 'submit' in request.POST and 'Send' in request.POST['submit'] and human_token:
             human_token = slugify(human_token)
             try:
-                voucher = Voucher.objects.select_for_update().get(human_token=human_token, user=request.user)
+                voucher = Voucher.objects.get(human_token=human_token, user=request.user)
             except Voucher.DoesNotExist:
                 raise Http404
             voucher_klass_form = get_voucher_form(voucher)
