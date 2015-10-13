@@ -1,4 +1,3 @@
-from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, redirect
@@ -18,7 +17,6 @@ LOGIN_URL = getattr(settings, 'LOGIN_URL', '/accounts/login/')
 
 
 @login_required(login_url=LOGIN_URL)
-@transaction.autocommit()
 def claim_voucher(request, human_token=None):
     """
     /vouchers/claim/

@@ -6,6 +6,7 @@ from voucher.models import Voucher
 
 class VoucherAdminForm(forms.ModelForm):
     class Meta:
+        fields = '__all__'
         model = Voucher
 
     def __init__(self, *args, **kwargs):

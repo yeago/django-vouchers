@@ -1,6 +1,6 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: django-vouchers
-Version: 0.6
+Version: 0.7
 Summary: Vouchers in Django
 Home-page: https://github.com/yeago/django-vouchers
 Author: Federico Castro

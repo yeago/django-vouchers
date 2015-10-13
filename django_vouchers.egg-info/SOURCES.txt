@@ -1,4 +1,3 @@
-MANIFEST.in
 README
 setup.py
 django_vouchers.egg-info/PKG-INFO
