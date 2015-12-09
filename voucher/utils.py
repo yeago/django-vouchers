@@ -50,7 +50,8 @@ def get_notify_user_template(voucher):
                      'voucher/notify_user.html',
                      'notify_user.html']
     template = select_template(try_templates)
-    return render_to_string(template.name, context)
+    name = template.name if hasattr(template, 'name') else template.template.name
+    return render_to_string(name, context)
 
 
 def render_email_for_voucher_claimed(voucher):

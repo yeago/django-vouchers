@@ -70,7 +70,8 @@ def claim_voucher(request, human_token=None):
                 except ValidationError as error:
                     messages.error(request, '\n'.join(error.messages))
     template = get_voucher_template(voucher)
-    return render_to_response(template.name,
+    name = template.name if hasattr(template, 'name') else template.template.name
+    return render_to_response(name,
                               RequestContext(request, {'voucher_name': voucher_name,
                                                        'token': human_token,
                                                        'is_claimed': is_claimed,
