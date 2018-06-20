@@ -3,7 +3,7 @@
 
     <p>Here you have the details of the voucher:</p>
     <div>
-        <a href="{% url "claim_voucher" voucher.human_token %}">Voucher link</a>
+        {{ voucher.get_voucher_info_template }}
     </div>
 
     <p><b>Voucher token:</b> {{ voucher.token }}</p>
