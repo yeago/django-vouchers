@@ -33,12 +33,12 @@ class Voucher(models.Model):
     voucher_info = JSONField(blank=True, null=True)
     token = models.CharField(unique=True, db_index=True, max_length=50)
     human_token = models.CharField(unique=True, db_index=True, max_length=255)
-    user = models.ForeignKey(User, blank=True, null=True, related_name='vouchers')
+    user = models.ForeignKey(User, blank=True, null=True, related_name='vouchers', on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, verbose_name=ugettext_lazy('Created By'), blank=True, null=True,
-                                   related_name='my_vouchers')
+                                   related_name='my_vouchers', on_delete=models.CASCADE)
     last_edit_datetime = models.DateTimeField(auto_now=True, blank=True, null=True)
     last_editor = models.ForeignKey(User, verbose_name=ugettext_lazy('Last Editor'), blank=True, null=True,
-                                   related_name='edited_vouchers')
+                                    related_name='edited_vouchers', on_delete=models.SET_NULL)
     notified = models.BooleanField(default=False)
     activated = models.BooleanField(default=True)
 

@@ -1,7 +1,7 @@
 import importlib
 
 from django.core.mail import EmailMultiAlternatives
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template.loader import select_template
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
