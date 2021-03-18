@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import Http404
 from django.template import RequestContext
@@ -71,9 +71,10 @@ def claim_voucher(request, human_token=None):
                     messages.error(request, '\n'.join(error.messages))
     template = get_voucher_template(voucher)
     name = template.name if hasattr(template, 'name') else template.template.name
-    return render_to_response(name,
-                              RequestContext(request, {'voucher_name': voucher_name,
-                                                       'token': human_token,
-                                                       'is_claimed': is_claimed,
-                                                       'form': form,
-                                                       'voucher': voucher}))
+    return render(request,
+                  name,
+                  {'voucher_name': voucher_name,
+                   'token': human_token,
+                   'is_claimed': is_claimed,
+                   'form': form,
+                   'voucher': voucher }))
