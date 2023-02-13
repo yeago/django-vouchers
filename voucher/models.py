@@ -6,7 +6,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import gettext_lazy
 from django.db import models
 
 from voucher.humanhash import HumanHasher
@@ -26,18 +26,18 @@ def get_voucher_choices():
 
 
 class Voucher(models.Model):
-    creation_date = models.DateTimeField(auto_now_add=True, verbose_name=ugettext_lazy('Creation Date'))
-    claimed_date = models.DateTimeField(verbose_name=ugettext_lazy('Used Date'), blank=True, null=True)
-    expiry_date = models.DateTimeField(verbose_name=ugettext_lazy('Expiration Date'), blank=True, null=True)
+    creation_date = models.DateTimeField(auto_now_add=True, verbose_name=gettext_lazy('Creation Date'))
+    claimed_date = models.DateTimeField(verbose_name=gettext_lazy('Used Date'), blank=True, null=True)
+    expiry_date = models.DateTimeField(verbose_name=gettext_lazy('Expiration Date'), blank=True, null=True)
     voucher = models.CharField(choices=get_voucher_choices(), max_length=50)
     voucher_info = JSONField(blank=True, null=True)
     token = models.CharField(unique=True, db_index=True, max_length=50)
     human_token = models.CharField(unique=True, db_index=True, max_length=255)
     user = models.ForeignKey(User, blank=True, null=True, related_name='vouchers', on_delete=models.CASCADE)
-    created_by = models.ForeignKey(User, verbose_name=ugettext_lazy('Created By'), blank=True, null=True,
+    created_by = models.ForeignKey(User, verbose_name=gettext_lazy('Created By'), blank=True, null=True,
                                    related_name='my_vouchers', on_delete=models.CASCADE)
     last_edit_datetime = models.DateTimeField(auto_now=True, blank=True, null=True)
-    last_editor = models.ForeignKey(User, verbose_name=ugettext_lazy('Last Editor'), blank=True, null=True,
+    last_editor = models.ForeignKey(User, verbose_name=gettext_lazy('Last Editor'), blank=True, null=True,
                                     related_name='edited_vouchers', on_delete=models.SET_NULL)
     notified = models.BooleanField(default=False)
     activated = models.BooleanField(default=True)
